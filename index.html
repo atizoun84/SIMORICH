@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulateur Intelligence Financière</title>
+
+<meta name="theme-color" content="#075e54">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="logoapp.png">
+<link rel="manifest" href="manifest.json">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+body{
+background:#ece5dd; /* Fond WhatsApp */
+}
+
+/* Barre de navigation */
+.nav-custom {
+    background: #075e54;
+    padding: 10px;
+}
+.nav-custom a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.header{
+/* Dégradé basé sur le vert WhatsApp */
+background: linear-gradient(45deg, #075e54, #128c7e);
+color:white;
+padding:25px;
+text-align:center;
+border-bottom: 3px solid #25d366;
+}
+
+.score{
+font-size:45px;
+font-weight:bold;
+}
+
+/* Style des cartes pour plus d'esthétique */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: #128c7e;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: #075e54;
+}
+
+/* Modal Style */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+.modal-header {
+    background: #075e54;
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+#capture-area {
+    padding: 20px;
+    background: white;
+}
+
+/* Style spécifique pour le prompt IA */
+#ai-prompt-text {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+/* Bouton d'installation flottant */
+#install-pwa {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+    z-index: 1050;
+    border-radius: 50px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    background-color: #25d366;
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+
+/* Style du footer concepteur */
+.footer-concepteur {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #555;
+    border-top: 1px solid #ddd;
+}
+</style>
+
+</head>
+
+<body>
+
+<nav class="nav-custom text-center">
+    <a href="etude_marche.html">📊 Étude de Marché Stratégique ➡</a>
+</nav>
+
+<div class="header">
+<h3>Simulateur Intelligence Financière</h3>
+<p>Analyse des décisions selon les principes de richesse</p>
+</div>
+
+<div class="container mt-4">
+
+<div class="card p-3">
+<h5>Simulation</h5>
+<label>Capital disponible (FCFA)</label>
+<input type="number" id="capital" class="form-control" oninput="saveData()">
+<br>
+<label>Action envisagée</label>
+<textarea id="action" class="form-control" oninput="saveData()"></textarea>
+<br>
+<label>Type</label>
+<select id="type" class="form-control" onchange="saveData()">
+<option value="actif">Investissement / Actif</option>
+<option value="business">Business</option>
+<option value="passif">Dépense</option>
+<option value="luxe">Objet de luxe</option>
+</select>
+<br>
+<label>Durée d'investissement (années)</label>
+<input type="number" id="duree" class="form-control" value="10" oninput="saveData()">
+<br>
+<label>Risque</label>
+<select id="risque" class="form-control" onchange="saveData()">
+<option value="faible">Faible</option>
+<option value="moyen">Moyen</option>
+<option value="eleve">Élevé</option>
+</select>
+<br>
+<div class="row g-2">
+    <div class="col-md-6">
+        <button class="btn btn-primary w-100" onclick="analyser()">
+            Analyser
+        </button>
+    </div>
+    <div class="col-md-6">
+        <button class="btn btn-outline-dark w-100" onclick="genererPromptIA()">
+            ✨ Générer Prompt IA
+        </button>
+    </div>
+</div>
+</div>
+
+<div class="card p-3 mt-4 mb-5">
+<h5>Simulation richesse sur <span id="display-duree">10</span> ans</h5>
+<canvas id="graph"></canvas>
+</div>
+
+<div class="footer-concepteur">
+    <p>Conçu par <strong>Atizoun Plateny AMOUSSOU</strong><br>
+    📧 atizoun@gmail.com | 📞 01 97 74 40 35</p>
+</div>
+
+</div>
+
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Résultat de l'analyse</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="capture-area text-center">
+            <div id="modal-content-to-copy">
+                <div class="text-center">
+                    <div class="score text-success" id="score">0</div>
+                    <div id="pronostic" class="mb-3"></div>
+                </div>
+                <hr>
+                <h6>Détails de l'analyse :</h6>
+                <div id="analyse" class="mb-3"></div>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" onclick="copyForWhatsApp()">
+            Copier pour WhatsApp
+        </button>
+        <button class="btn btn-outline-secondary" onclick="telechargerImage()">
+            Télécharger Image
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="aiPromptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #128c7e;">
+        <h5 class="modal-title">Prompt pour Expert IA</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">Copiez ce prompt et collez-le dans ChatGPT, Claude ou Gemini pour une analyse stratégique approfondie.</p>
+        <div id="ai-prompt-text"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="copyAIPrompt()">
+            Copier le prompt
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="install-pwa">📲 Installer l'App</button>
+
+
+<script>
+
+let chart;
+const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+const aiPromptModal = new bootstrap.Modal(document.getElementById('aiPromptModal'));
+
+// --- LOGIQUE DE MÉMOIRE (LOCALSTORAGE) ---
+
+function saveData() {
+    const data = {
+        capital: document.getElementById("capital").value,
+        action: document.getElementById("action").value,
+        type: document.getElementById("type").value,
+        duree: document.getElementById("duree").value,
+        risque: document.getElementById("risque").value
+    };
+    localStorage.setItem('financeSimData', JSON.stringify(data));
+}
+
+function loadData() {
+    const savedData = localStorage.getItem('financeSimData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        document.getElementById("capital").value = data.capital || "";
+        document.getElementById("action").value = data.action || "";
+        document.getElementById("type").value = data.type || "actif";
+        document.getElementById("duree").value = data.duree || "10";
+        document.getElementById("risque").value = data.risque || "faible";
+    }
+}
+
+// Charger les données au démarrage
+window.onload = loadData;
+
+// --- FONCTIONS EXISTANTES ---
+
+function analyser(){
+
+let capital=parseFloat(document.getElementById("capital").value);
+let action=document.getElementById("action").value.toLowerCase();
+let type=document.getElementById("type").value;
+let risque=document.getElementById("risque").value;
+let duree=parseInt(document.getElementById("duree").value);
+
+if(isNaN(capital)) { alert("Veuillez saisir un capital"); return; }
+
+let score=50;
+let analyse=[];
+let rendement=0.05;
+
+if(type==="actif"){
+score+=20;
+rendement=0.12;
+analyse.push("✔ Investissement dans un actif");
+}
+
+if(type==="business"){
+score+=25;
+rendement=0.20;
+analyse.push("✔ Création possible de revenu actif");
+}
+
+if(type==="passif"){
+score-=20;
+rendement=0;
+analyse.push("❌ Dépense non productive");
+}
+
+if(type==="luxe"){
+score-=30;
+rendement=-0.05;
+analyse.push("❌ Achat de luxe");
+}
+
+if(action.includes("commerce")){
+score+=10;
+analyse.push("✔ Activité commerciale détectée");
+}
+
+if(action.includes("moto") || action.includes("taxi")){
+score+=10;
+analyse.push("✔ Actif générateur de revenu");
+}
+
+if(action.includes("telephone") || action.includes("iphone")){
+score-=10;
+analyse.push("⚠ Produit technologique dépréciable");
+}
+
+if(risque==="faible") score+=5;
+if(risque==="eleve") score-=5;
+
+let pronostic="";
+if(score>=80) pronostic="Excellente décision financière";
+else if(score>=60) pronostic="Bonne décision financière";
+else if(score>=40) pronostic="Décision moyenne";
+else pronostic="Décision financière risquée";
+
+// Mise à jour des éléments de la modale
+document.getElementById("score").innerHTML=score+"/100";
+document.getElementById("pronostic").innerHTML="<b>"+pronostic+"</b>";
+document.getElementById("display-duree").innerText=duree;
+
+let html="";
+analyse.forEach(a=>{
+html+="<div>"+a+"</div>";
+});
+document.getElementById("analyse").innerHTML=html;
+
+// Calcul richesse et graphique
+simulerRichesse(capital,rendement,duree);
+
+// Affichage de la modale
+resultModal.show();
+}
+
+function simulerRichesse(capital,rendement,duree){
+let valeurs=[];
+let labels=[];
+let argent=capital;
+
+for(let i=0;i<=duree;i++){
+labels.push("Année "+i);
+valeurs.push(Math.round(argent));
+argent=argent*(1+rendement);
+}
+
+if(chart){
+chart.destroy();
+}
+
+chart=new Chart(document.getElementById("graph"),{
+type:"line",
+data:{
+labels:labels,
+datasets:[{
+label:"Evolution richesse (FCFA)",
+data:valeurs,
+borderColor: "#128c7e",
+backgroundColor: "rgba(18, 140, 126, 0.1)",
+fill: true,
+borderWidth:3,
+tension: 0.3
+}]
+}
+});
+}
+
+function copyForWhatsApp() {
+    const score = document.getElementById("score").innerText;
+    const pronostic = document.getElementById("pronostic").innerText;
+    const analyseDivs = document.getElementById("analyse").querySelectorAll('div');
+    let analyseText = "";
+    analyseDivs.forEach(div => analyseText += div.innerText + "\n");
+
+    const texteFinal = `*Analyse Intelligence Financière*\n\n*Score :* ${score}\n*Pronostic :* ${pronostic}\n\n*Détails :*\n${analyseText}`;
+    
+    navigator.clipboard.writeText(texteFinal).then(() => {
+        alert("Copié dans le presse-papier !");
+    });
+}
+
+function telechargerImage() {
+    const zone = document.querySelector(".modal-content");
+    html2canvas(zone).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'analyse-financiere.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+/** FONCTIONS AJOUTÉES POUR LE PROMPT IA **/
+
+function genererPromptIA() {
+    const capital = document.getElementById("capital").value;
+    const action = document.getElementById("action").value;
+    const type = document.getElementById("type").options[document.getElementById("type").selectedIndex].text;
+    const risque = document.getElementById("risque").value;
+    const duree = document.getElementById("duree").value;
+
+    if(!capital || !action) { alert("Veuillez remplir le capital et l'action avant de générer le prompt."); return; }
+
+    const prompt = `Agis en tant qu'expert en intelligence financière et conseiller stratégique en investissement. 
+
+J'ai une idée de dépense/investissement suivante : 
+- **Action envisagée** : ${action}
+- **Capital disponible** : ${capital} FCFA
+- **Catégorie** : ${type}
+- **Niveau de risque estimé** : ${risque}
+- **Horizon de temps** : ${duree} ans
+
+Peux-tu me fournir une analyse détaillée incluant :
+1. **Analyse SWOT** (Points forts, Faiblesses, Opportunités, Risques).
+2. **Évaluation de la pertinence** : Est-ce une décision judicieuse pour bâtir une richesse sur le long terme ?
+3. **Feuille de route pratique** : Quelles sont les étapes concrètes, mois par mois, pour exécuter cette idée de façon optimale et minimiser les pertes ?
+4. **Conseils d'expert** : Quelles alternatives ou optimisations suggères-tu pour maximiser le rendement ?
+
+Réponds de manière structurée et pédagogique.`;
+
+    document.getElementById("ai-prompt-text").innerText = prompt;
+    aiPromptModal.show();
+}
+
+function copyAIPrompt() {
+    const promptText = document.getElementById("ai-prompt-text").innerText;
+    navigator.clipboard.writeText(promptText).then(() => {
+        alert("Prompt IA copié ! Vous pouvez maintenant le coller dans votre IA favorite.");
+    });
+}
+
+/** LOGIQUE PWA & INSTALLATION **/
+
+let deferredPrompt;
+const installBtn = document.getElementById('install-pwa');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            installBtn.style.display = 'none';
+        }
+        deferredPrompt = null;
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    console.log('PWA installée');
+});
+
+/** ENREGISTREMENT DU SERVICE WORKER EXTERNE **/
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker enregistré !', reg))
+            .catch(err => console.log('Erreur SW:', err));
+    });
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Étude de Marché - Validation 99%</title>
+
+<meta name="theme-color" content="#075e54">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="logoapp.png">
+<link rel="manifest" href="manifest.json">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+body{
+background:#ece5dd; /* Fond WhatsApp */
+}
+
+.header{
+background: linear-gradient(45deg, #075e54, #128c7e);
+color:white;
+padding:20px;
+text-align:center;
+border-bottom: 3px solid #25d366;
+}
+
+/* Barre de navigation */
+.nav-custom {
+    background: #075e54;
+    padding: 10px;
+}
+.nav-custom a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.score{
+font-size:45px;
+font-weight:bold;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: #128c7e;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: #075e54;
+}
+
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+.modal-header {
+    background: #075e54;
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+#capture-area {
+    padding: 20px;
+    background: white;
+}
+
+#ai-prompt-text {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+#install-pwa {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+    z-index: 1050;
+    border-radius: 50px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    background-color: #25d366;
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+
+.footer-concepteur {
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #555;
+    border-top: 1px solid #ddd;
+}
+
+.section-title {
+    color: #075e54;
+    border-left: 4px solid #25d366;
+    padding-left: 10px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.hint {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-style: italic;
+    display: block;
+    margin-bottom: 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<nav class="nav-custom text-center">
+    <a href="index.html">⬅ Vers Analyse de Dépenses</a>
+</nav>
+
+<div class="header">
+<h3>Étude de Marché Stratégique</h3>
+<p>Valider une idée d'entreprise à fort potentiel (99%)</p>
+</div>
+
+<div class="container mt-4">
+
+<div class="card p-3">
+<h5>Formulaire de Collecte de Données</h5>
+<p class="text-muted small">Menez l'entretien et remplissez chaque point avec précision.</p>
+
+<div class="section-title">I. Qualification du Profil</div>
+<label>Activité principale</label>
+<span class="hint">Que fait la personne concrètement chaque jour ?</span>
+<input type="text" id="profil_activite" class="form-control mb-3" oninput="saveData()">
+
+<label>Outils de travail actuels</label>
+<span class="hint">De quoi ne peut-elle pas se passer ? (Ex: WhatsApp, cahier)</span>
+<input type="text" id="profil_outils" class="form-control mb-3" oninput="saveData()">
+
+<label>Capacité d'investissement mensuel</label>
+<span class="hint">Budget max pour gagner en productivité (FCFA).</span>
+<input type="number" id="profil_budget" class="form-control mb-3" oninput="saveData()">
+
+<div class="section-title">II. Test de l'Idée</div>
+<label>Nom du projet testé</label>
+<span class="hint">L'idée que vous présentez aujourd'hui.</span>
+<input type="text" id="idee_nom" class="form-control mb-3" oninput="saveData()">
+
+<label>Réaction à chaud</label>
+<span class="hint">Notez les premiers mots du prospect après votre pitch.</span>
+<textarea id="idee_reaction" class="form-control mb-3" oninput="saveData()"></textarea>
+
+<label>Score de besoin (1 à 10)</label>
+<span class="hint">À quel point est-ce "vital" pour lui ?</span>
+<input type="range" id="idee_score" class="form-range" min="1" max="10" step="1" oninput="saveData()">
+
+<label>La fonctionnalité "Magique"</label>
+<span class="hint">Quelle option précise le fait craquer ?</span>
+<input type="text" id="idee_best_feature" class="form-control mb-3" oninput="saveData()">
+
+<label>Objections majeures</label>
+<span class="hint">Qu'est-ce qui pourrait l'empêcher de payer ?</span>
+<input type="text" id="idee_freins" class="form-control mb-3" oninput="saveData()">
+
+<div class="section-title">III. Concurrence</div>
+<label>Solutions déjà essayées ?</label>
+<span class="hint">Existe-t-il un équivalent sur le marché ?</span>
+<select id="mkt_existant" class="form-control mb-3" onchange="saveData()">
+    <option value="non">Non, rien de tel</option>
+    <option value="oui">Oui, ça existe déjà</option>
+</select>
+
+<label>Points faibles de la concurrence</label>
+<span class="hint">Pourquoi ne sont-ils pas satisfaits de l'existant ?</span>
+<textarea id="mkt_defauts" class="form-control mb-3" oninput="saveData()"></textarea>
+
+<div class="section-title">IV. Argent et Valeur</div>
+<label>Préférence de paiement</label>
+<span class="hint">Comment préfère-t-il sortir son argent ?</span>
+<select id="eco_paiement" class="form-control mb-3" onchange="saveData()">
+    <option value="usage">Par transaction (Usage)</option>
+    <option value="abonnement">Abonnement (Mensuel)</option>
+    <option value="achat">Achat unique (Licence)</option>
+</select>
+
+<label>Prix de test immédiat</label>
+<span class="hint">Combien paierait-il pour tester 1 mois (FCFA) ?</span>
+<input type="number" id="eco_test_prix" class="form-control mb-3" oninput="saveData()">
+
+<div class="section-title">V. Logistique Terrain</div>
+<label>Appareil utilisé</label>
+<span class="hint">Sur quel support l'outil doit-il être ?</span>
+<select id="log_support" class="form-control mb-3" onchange="saveData()">
+    <option value="smartphone">Smartphone</option>
+    <option value="ordinateur">Ordinateur</option>
+    <option value="les_deux">Smartphone + PC</option>
+</select>
+
+<label>Utilisation sans Internet</label>
+<span class="hint">La connexion est-elle instable sur son lieu de travail ?</span>
+<select id="log_offline" class="form-control mb-3" onchange="saveData()">
+    <option value="oui">Oui, mode hors-ligne obligatoire</option>
+    <option value="non">Non, internet est permanent</option>
+</select>
+
+<label>Potentiel de parrainage</label>
+<span class="hint">Connaît-il 5 autres personnes prêtes à payer ?</span>
+<select id="log_viral" class="form-control mb-3" onchange="saveData()">
+    <option value="oui">Oui, au moins 5</option>
+    <option value="non">Non, cas isolé</option>
+</select>
+
+<br>
+<div class="row g-2">
+    <div class="col-md-6">
+        <button class="btn btn-primary w-100" onclick="analyserEtude()">
+            Calculer Score de Viabilité
+        </button>
+    </div>
+    <div class="col-md-6">
+        <button class="btn btn-outline-dark w-100" onclick="genererPromptIAEtude()">
+            ✨ Analyse Stratégique IA
+        </button>
+    </div>
+</div>
+</div>
+
+<div class="card p-3 mt-4 mb-5 text-center">
+    <h5>Potentiel de Réussite</h5>
+    <div id="viability-chart-container">
+        <canvas id="graph"></canvas>
+    </div>
+</div>
+
+<div class="footer-concepteur">
+    <p>Conçu par <strong>Atizoun Plateny AMOUSSOU</strong><br>
+    📧 atizoun@gmail.com | 📞 01 97 74 40 35</p>
+</div>
+
+</div>
+
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Viabilité de l'Idée</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-content-to-copy">
+            <div class="text-center">
+                <div class="score text-success" id="score">0</div>
+                <div id="pronostic" class="mb-3"></div>
+            </div>
+            <hr>
+            <h6>Analyse des Signaux :</h6>
+            <div id="analyse" class="mb-3"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" onclick="copyForWhatsApp()">Copier pour WhatsApp</button>
+        <button class="btn btn-outline-secondary" onclick="telechargerImage()">Image</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="aiPromptModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background: #128c7e;">
+        <h5 class="modal-title">Analyse Expert IA</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="ai-prompt-text"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="copyAIPrompt()">Copier le prompt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="install-pwa">📲 Installer l'App</button>
+
+<script>
+let chart;
+const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+const aiPromptModal = new bootstrap.Modal(document.getElementById('aiPromptModal'));
+
+function saveData() {
+    const data = {
+        profil_activite: document.getElementById("profil_activite").value,
+        profil_outils: document.getElementById("profil_outils").value,
+        profil_budget: document.getElementById("profil_budget").value,
+        idee_nom: document.getElementById("idee_nom").value,
+        idee_reaction: document.getElementById("idee_reaction").value,
+        idee_score: document.getElementById("idee_score").value,
+        idee_best_feature: document.getElementById("idee_best_feature").value,
+        idee_freins: document.getElementById("idee_freins").value,
+        mkt_existant: document.getElementById("mkt_existant").value,
+        mkt_defauts: document.getElementById("mkt_defauts").value,
+        eco_paiement: document.getElementById("eco_paiement").value,
+        eco_test_prix: document.getElementById("eco_test_prix").value,
+        log_support: document.getElementById("log_support").value,
+        log_offline: document.getElementById("log_offline").value,
+        log_viral: document.getElementById("log_viral").value
+    };
+    localStorage.setItem('marketStudyData', JSON.stringify(data));
+}
+
+function loadData() {
+    const savedData = localStorage.getItem('marketStudyData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        for (const key in data) {
+            if(document.getElementById(key)) document.getElementById(key).value = data[key];
+        }
+    }
+}
+
+window.onload = loadData;
+
+function analyserEtude(){
+    let score = 0;
+    let analyse = [];
+    
+    const reaction = document.getElementById("idee_reaction").value.toLowerCase();
+    const indispensable = parseInt(document.getElementById("idee_score").value);
+    const budget = parseFloat(document.getElementById("eco_test_prix").value) || 0;
+    const viral = document.getElementById("log_viral").value;
+
+    score += (indispensable * 5); // Max 50 pts
+
+    if(reaction.includes("coûte") || reaction.includes("prix") || reaction.includes("payer")) {
+        score += 20;
+        analyse.push("🔥 <b>Signal Fort :</b> Le client parle d'argent immédiatement.");
+    }
+
+    if(budget > 0) {
+        score += 15;
+        analyse.push("💰 <b>Budget :</b> Intention de test financé confirmée.");
+    }
+
+    if(viral === "oui") {
+        score += 15;
+        analyse.push("🚀 <b>Viralité :</b> Le prospect peut amener d'autres clients.");
+    }
+
+    let pronostic = "";
+    if(score >= 80) pronostic = "Idée validée à 99% - Foncez !";
+    else if(score >= 60) pronostic = "Potentiel sérieux - À affiner.";
+    else if(score >= 40) pronostic = "Projet risqué ou niche peu solvable.";
+    else pronostic = "Idée à pivoter ou abandonner.";
+
+    document.getElementById("score").innerHTML = score + "/100";
+    document.getElementById("pronostic").innerHTML = "<b>" + pronostic + "</b>";
+    
+    let html = "";
+    analyse.forEach(a => { html += "<div>" + a + "</div>"; });
+    document.getElementById("analyse").innerHTML = html;
+
+    updateChart(score);
+    resultModal.show();
+}
+
+function updateChart(scoreVal) {
+    if(chart) chart.destroy();
+    chart = new Chart(document.getElementById("graph"), {
+        type: "doughnut",
+        data: {
+            labels: ["Viabilité", "Risque"],
+            datasets: [{
+                data: [scoreVal, 100 - scoreVal],
+                backgroundColor: ["#128c7e", "#dee2e6"]
+            }]
+        },
+        options: { cutout: '70%', plugins: { legend: { display: false } } }
+    });
+}
+
+function genererPromptIAEtude() {
+    const data = JSON.parse(localStorage.getItem('marketStudyData'));
+    const prompt = `Agis en tant que Business Analyst Expert. Analyse ce projet :
+Idée: ${data.idee_nom}
+Cible: ${data.profil_activite}
+Réaction: ${data.idee_reaction}
+Score: ${data.idee_score}/10
+Off-line requis: ${data.log_offline}
+Viralité: ${data.log_viral}
+
+Fournis : 1. Diagnostic de viabilité 2. Stratégie de différenciation 3. Modèle de prix 4. MVP PWA en 3 étapes.`;
+
+    document.getElementById("ai-prompt-text").innerText = prompt;
+    aiPromptModal.show();
+}
+
+function copyForWhatsApp() {
+    const text = `*Étude de Marché - ${document.getElementById("idee_nom").value}*\n*Score :* ${document.getElementById("score").innerText}\n*Pronostic :* ${document.getElementById("pronostic").innerText}`;
+    navigator.clipboard.writeText(text).then(() => alert("Copié !"));
+}
+
+function telechargerImage() {
+    html2canvas(document.querySelector("#resultModal .modal-content")).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'etude.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+function copyAIPrompt() {
+    navigator.clipboard.writeText(document.getElementById("ai-prompt-text").innerText).then(() => alert("Prompt copié !"));
+}
+
+let deferredPrompt;
+const installBtn = document.getElementById('install-pwa');
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+});
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+    }
+});
+</script>
+
+</body>
+</html>
