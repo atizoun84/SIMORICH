@@ -401,15 +401,33 @@ function updateChart(scoreVal) {
 
 function genererPromptIAEtude() {
     const data = JSON.parse(localStorage.getItem('marketStudyData'));
-    const prompt = `Agis en tant que Business Analyst Expert. Analyse ce projet :
-Idée: ${data.idee_nom}
-Cible: ${data.profil_activite}
-Réaction: ${data.idee_reaction}
-Score: ${data.idee_score}/10
-Off-line requis: ${data.log_offline}
-Viralité: ${data.log_viral}
+    const scoreText = document.getElementById("score").innerText;
+    
+    const prompt = `Agis en tant qu'expert en intelligence financière et conseiller stratégique en investissement. 
 
-Fournis : 1. Diagnostic de viabilité 2. Stratégie de différenciation 3. Modèle de prix 4. MVP PWA en 3 étapes.`;
+J'ai une idée de dépense/investissement suivante basée sur une étude de terrain : 
+- **Action envisagée** : ${data.idee_nom}
+- **Cible (Activité du client)** : ${data.profil_activite}
+- **Outils actuels du client** : ${data.profil_outils}
+- **Capital disponible/Budget mensuel client** : ${data.profil_budget} FCFA
+- **Réaction terrain** : ${data.idee_reaction}
+- **Score de besoin** : ${data.idee_score}/10
+- **Fonctionnalité clé** : ${data.idee_best_feature}
+- **Objections/Freins** : ${data.idee_freins}
+- **État concurrence** : ${data.mkt_existant} (Défauts : ${data.mkt_defauts})
+- **Modèle de paiement souhaité** : ${data.eco_paiement}
+- **Prix de test** : ${data.eco_test_prix} FCFA
+- **Support technique** : ${data.log_support} (Hors-ligne : ${data.log_offline})
+- **Potentiel viral** : ${data.log_viral}
+- **Score de viabilité calculé** : ${scoreText}
+
+Peux-tu me fournir une analyse détaillée incluant :
+1. **Analyse SWOT** (Points forts, Faiblesses, Opportunités, Risques).
+2. **Évaluation de la pertinence** : Est-ce une décision judicieuse pour bâtir une richesse sur le long terme ?
+3. **Feuille de route pratique** : Quelles sont les étapes concrètes, mois par mois, pour exécuter cette idée de façon optimale et minimiser les pertes ?
+4. **Conseils d'expert** : Quelles alternatives ou optimisations suggères-tu pour maximiser le rendement ?
+
+Réponds de manière structurée et pédagogique.`;
 
     document.getElementById("ai-prompt-text").innerText = prompt;
     aiPromptModal.show();
